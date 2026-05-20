@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GroundView™ — Member Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: #2a2a3a;
+  --accent: #e8ff47;
+  --accent2: #47c8ff;
+  --accent3: #ff6b47;
+  --success: #47ff8a;
+  --warning: #ffbb47;
+  --text: #f0f0f8;
+  --muted: #7a7a9a;
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── AUTH SCREEN ── */
+.auth-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:var(--bg); padding:24px;
+  background-image: linear-gradient(rgba(232,255,71,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(232,255,71,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.auth-card {
+  width:100%; max-width:440px;
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:48px 40px; position:relative;
+}
+.auth-logo { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--accent); letter-spacing:2px; margin-bottom:8px; }
+.auth-logo span { color:var(--text); }
+.auth-subtitle { font-size:14px; color:var(--muted); margin-bottom:36px; }
+.auth-tabs { display:flex; gap:0; margin-bottom:32px; background:var(--bg); border-radius:8px; padding:4px; }
+.auth-tab {
+  flex:1; padding:9px; text-align:center; border-radius:6px;
+  font-size:14px; font-weight:500; cursor:pointer; border:none;
+  background:transparent; color:var(--muted); transition:all 0.2s; font-family:inherit;
+}
+.auth-tab.active { background:var(--surface2); color:var(--text); }
+.form-group { margin-bottom:18px; }
+.form-label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px; }
+.form-input {
+  width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text);
+  padding:12px 14px; border-radius:8px; font-size:14px; font-family:inherit;
+  outline:none; transition:border-color 0.2s;
+}
+.form-input:focus { border-color:var(--accent); }
+.form-input::placeholder { color:var(--muted); }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.btn-auth {
+  width:100%; background:var(--accent); color:#0a0a0f; border:none;
+  border-radius:8px; padding:14px; font-weight:700; font-size:15px;
+  cursor:pointer; margin-top:8px; font-family:inherit;
+  transition:opacity 0.2s, transform 0.15s;
+}
+.btn-auth:hover { opacity:0.88; transform:translateY(-1px); }
+.auth-divider { text-align:center; color:var(--muted); font-size:13px; margin:20px 0; }
+.auth-back { text-align:center; margin-top:20px; font-size:13px; color:var(--muted); }
+.auth-back a { color:var(--accent2); text-decoration:none; }
+
+/* ── APP SHELL ── */
+.app { display:none; min-height:100vh; }
+.app.visible { display:flex; flex-direction:column; }
+
+/* ── TOP NAV ── */
+.app-nav {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 32px; display:flex; align-items:center; justify-content:space-between;
+  height:60px; position:sticky; top:0; z-index:100;
+}
+.app-nav-logo { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); letter-spacing:2px; }
+.app-nav-logo span { color:var(--text); }
+.app-nav-links { display:flex; gap:4px; }
+.nav-link {
+  padding:8px 16px; border-radius:8px; font-size:14px; font-weight:500;
+  color:var(--muted); background:transparent; border:none; cursor:pointer;
+  transition:all 0.15s; font-family:inherit; display:flex; align-items:center; gap:6px;
+}
+.nav-link:hover, .nav-link.active { background:var(--surface2); color:var(--text); }
+.nav-link .badge {
+  background:var(--accent3); color:#fff; font-size:10px; font-weight:700;
+  padding:1px 6px; border-radius:100px;
+}
+.app-nav-user { display:flex; align-items:center; gap:12px; }
+.user-avatar {
+  width:34px; height:34px; border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; color:#0a0a0f;
+}
+.user-name { font-size:14px; font-weight:500; }
+.btn-logout {
+  background:transparent; border:1px solid var(--border); color:var(--muted);
+  padding:6px 14px; border-radius:6px; font-size:13px; cursor:pointer; font-family:inherit;
+  transition:all 0.15s;
+}
+.btn-logout:hover { border-color:var(--accent3); color:var(--accent3); }
+
+/* ── MAIN CONTENT ── */
+.app-main { flex:1; padding:32px; max-width:1100px; margin:0 auto; width:100%; }
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom:32px; }
+.page-header h1 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:1px; margin-bottom:6px; }
+.page-header p { color:var(--muted); font-size:15px; }
+
+/* ── DASHBOARD ── */
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+.dash-stat {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px 24px;
+}
+.dash-stat-num { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:1px; }
+.dash-stat-num.accent { color:var(--accent); }
+.dash-stat-num.blue { color:var(--accent2); }
+.dash-stat-num.orange { color:var(--accent3); }
+.dash-stat-num.green { color:var(--success); }
+.dash-stat-label { font-size:12px; color:var(--muted); margin-top:2px; }
+.dash-recent { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.dash-recent-header {
+  padding:18px 24px; border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.dash-recent-header h3 { font-size:15px; font-weight:600; }
+.btn-new-order {
+  background:var(--accent); color:#0a0a0f; border:none;
+  padding:9px 20px; border-radius:8px; font-weight:700; font-size:13px;
+  cursor:pointer; font-family:inherit; transition:opacity 0.2s;
+}
+.btn-new-order:hover { opacity:0.85; }
+
+/* ── ORDER CARD ── */
+.order-card {
+  padding:20px 24px; border-bottom:1px solid var(--border);
+  display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start;
+}
+.order-card:last-child { border-bottom:none; }
+.order-address { font-weight:600; font-size:15px; margin-bottom:4px; }
+.order-meta { font-size:13px; color:var(--muted); display:flex; gap:16px; flex-wrap:wrap; }
+.order-type-tag {
+  display:inline-block; font-size:11px; font-weight:600; padding:3px 10px;
+  border-radius:100px; margin-bottom:6px;
+}
+.tag-lockbox { background:rgba(71,200,255,0.1); color:var(--accent2); border:1px solid rgba(71,200,255,0.2); }
+.tag-appt { background:rgba(232,255,71,0.1); color:var(--accent); border:1px solid rgba(232,255,71,0.2); }
+.tag-exterior { background:rgba(255,187,71,0.1); color:var(--warning); border:1px solid rgba(255,187,71,0.2); }
+.order-status {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:600; padding:4px 12px; border-radius:100px;
+}
+.status-pending { background:rgba(255,187,71,0.1); color:var(--warning); border:1px solid rgba(255,187,71,0.2); }
+.status-assigned { background:rgba(71,200,255,0.1); color:var(--accent2); border:1px solid rgba(71,200,255,0.2); }
+.status-complete { background:rgba(71,255,138,0.1); color:var(--success); border:1px solid rgba(71,255,138,0.2); }
+.status-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.order-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.btn-sm {
+  padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600;
+  cursor:pointer; border:1px solid var(--border); background:var(--surface2);
+  color:var(--text); font-family:inherit; transition:all 0.15s;
+}
+.btn-sm:hover { border-color:var(--accent2); color:var(--accent2); }
+.btn-sm.download { border-color:var(--success); color:var(--success); background:rgba(71,255,138,0.05); }
+.btn-sm.msg { border-color:var(--accent2); color:var(--accent2); background:rgba(71,200,255,0.05); }
+.order-right { text-align:right; }
+.order-price { font-family:'DM Mono',monospace; font-size:16px; font-weight:500; color:var(--accent3); }
+.order-date { font-size:12px; color:var(--muted); margin-top:4px; }
+
+/* ── ORDER PLACEMENT - STEP WIZARD ── */
+.order-wizard { max-width:780px; }
+.steps-progress { display:flex; align-items:center; margin-bottom:40px; }
+.step-bubble {
+  width:36px; height:36px; border-radius:50%; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; color:var(--muted); flex-shrink:0;
+  transition:all 0.3s;
+}
+.step-bubble.active { border-color:var(--accent); color:var(--accent); background:rgba(232,255,71,0.08); }
+.step-bubble.done { border-color:var(--success); background:var(--success); color:#0a0a0f; }
+.step-connector { flex:1; height:2px; background:var(--border); margin:0 8px; transition:background 0.3s; }
+.step-connector.done { background:var(--success); }
+.step-label { font-size:11px; color:var(--muted); text-align:center; margin-top:6px; }
+
+.wizard-step { display:none; }
+.wizard-step.active { display:block; }
+
+.card-section {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:20px; overflow:hidden;
+}
+.card-section-header {
+  padding:18px 24px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.card-section-header h3 { font-size:15px; font-weight:600; }
+.card-section-body { padding:24px; }
+.section-icon { font-size:18px; }
+
+/* Order Type Cards */
+.order-type-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.order-type-card {
+  border:2px solid var(--border); border-radius:var(--radius); padding:24px;
+  cursor:pointer; transition:all 0.2s; position:relative;
+}
+.order-type-card:hover { border-color:var(--accent2); background:rgba(71,200,255,0.03); }
+.order-type-card.selected { border-color:var(--accent); background:rgba(232,255,71,0.04); }
+.order-type-card.selected::after {
+  content:'✓'; position:absolute; top:12px; right:12px;
+  width:22px; height:22px; background:var(--accent); color:#0a0a0f;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700;
+}
+.otc-icon { font-size:28px; margin-bottom:12px; }
+.otc-name { font-size:15px; font-weight:700; margin-bottom:4px; }
+.otc-desc { font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.5; }
+.otc-price { font-family:'DM Mono',monospace; font-size:22px; color:var(--accent3); font-weight:500; }
+.otc-price-note { font-size:11px; color:var(--muted); }
+
+/* Property type addon */
+.property-type-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.prop-btn {
+  padding:8px 16px; border-radius:8px; border:1px solid var(--border);
+  background:var(--bg); color:var(--muted); font-size:13px; font-weight:500;
+  cursor:pointer; font-family:inherit; transition:all 0.15s;
+}
+.prop-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(232,255,71,0.06); }
+
+/* Lockbox field */
+.lockbox-field {
+  background:rgba(71,200,255,0.05); border:1px solid rgba(71,200,255,0.2);
+  border-radius:10px; padding:18px 20px; margin-top:16px; display:none;
+}
+.lockbox-field.visible { display:block; }
+.lockbox-note { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5; }
+.lockbox-note strong { color:var(--warning); }
+
+/* Address lookup */
+.address-lookup-wrap { position:relative; }
+.address-verify {
+  display:none; margin-top:12px; padding:12px 16px; border-radius:8px;
+  font-size:13px; gap:10px; align-items:flex-start;
+}
+.address-verify.show { display:flex; }
+.address-verify.ok { background:rgba(71,255,138,0.08); border:1px solid rgba(71,255,138,0.2); color:var(--success); }
+.address-verify.warn { background:rgba(255,187,71,0.08); border:1px solid rgba(255,187,71,0.2); color:var(--warning); }
+.address-verify.error { background:rgba(255,107,71,0.08); border:1px solid rgba(255,107,71,0.2); color:var(--accent3); }
+
+/* Gated community */
+.gated-toggle { display:flex; align-items:center; gap:12px; margin-top:16px; cursor:pointer; }
+.toggle-switch {
+  width:42px; height:24px; background:var(--border); border-radius:100px;
+  position:relative; transition:background 0.2s; flex-shrink:0;
+}
+.toggle-switch.on { background:var(--accent); }
+.toggle-knob {
+  width:18px; height:18px; background:white; border-radius:50%;
+  position:absolute; top:3px; left:3px; transition:transform 0.2s;
+}
+.toggle-switch.on .toggle-knob { transform:translateX(18px); }
+.gated-label { font-size:14px; font-weight:500; }
+.gated-info {
+  display:none; margin-top:14px; padding:14px 16px; background:rgba(255,187,71,0.06);
+  border:1px solid rgba(255,187,71,0.2); border-radius:8px; font-size:13px; color:var(--muted); line-height:1.6;
+}
+.gated-info.visible { display:block; }
+
+/* Speed options */
+.speed-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.speed-card {
+  border:2px solid var(--border); border-radius:10px; padding:18px;
+  cursor:pointer; transition:all 0.2s; text-align:center;
+}
+.speed-card:hover { border-color:var(--accent2); }
+.speed-card.selected { border-color:var(--accent); background:rgba(232,255,71,0.04); }
+.speed-badge {
+  display:inline-block; font-size:10px; font-weight:700; padding:2px 8px;
+  border-radius:100px; margin-bottom:10px; letter-spacing:0.5px;
+}
+.badge-std { background:rgba(71,255,138,0.1); color:var(--success); border:1px solid rgba(71,255,138,0.2); }
+.badge-rush { background:rgba(255,187,71,0.1); color:var(--warning); border:1px solid rgba(255,187,71,0.2); }
+.badge-rocket { background:rgba(255,107,71,0.1); color:var(--accent3); border:1px solid rgba(255,107,71,0.2); }
+.speed-name { font-size:14px; font-weight:700; margin-bottom:4px; }
+.speed-desc { font-size:11px; color:var(--muted); line-height:1.5; }
+.speed-price { font-family:'DM Mono',monospace; font-size:13px; color:var(--accent3); margin-top:8px; }
+
+/* What's included */
+.included-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.included-section h4 { font-size:13px; font-weight:700; color:var(--accent2); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.included-list { list-style:none; display:flex; flex-direction:column; gap:5px; }
+.included-list li { font-size:12px; color:var(--muted); display:flex; gap:8px; line-height:1.4; }
+.included-list li::before { content:'→'; color:var(--accent); flex-shrink:0; font-size:11px; margin-top:1px; }
+
+/* Comments */
+.comments-area {
+  width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text);
+  padding:12px 14px; border-radius:8px; font-size:13px; font-family:inherit;
+  outline:none; resize:vertical; min-height:100px; transition:border-color 0.2s;
+  line-height:1.6;
+}
+.comments-area:focus { border-color:var(--accent); }
+.comments-warning {
+  margin-top:10px; padding:12px 14px; background:rgba(255,187,71,0.06);
+  border:1px solid rgba(255,187,71,0.2); border-radius:8px;
+  font-size:12px; color:var(--muted); line-height:1.6;
+}
+.comments-warning strong { color:var(--warning); }
+
+/* File upload */
+.file-upload-zone {
+  border:1.5px dashed var(--border); border-radius:8px; padding:24px;
+  text-align:center; cursor:pointer; transition:border-color 0.2s; position:relative;
+}
+.file-upload-zone:hover { border-color:var(--accent2); }
+.file-upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.file-upload-zone p { font-size:13px; color:var(--muted); }
+.file-upload-zone small { font-size:11px; color:var(--muted); margin-top:4px; display:block; }
+.file-list { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+.file-item { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--bg); border-radius:6px; font-size:12px; }
+.file-remove { color:var(--accent3); cursor:pointer; font-weight:600; }
+
+/* Review */
+.review-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.review-item { }
+.review-label { font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.review-value { font-size:14px; font-weight:500; }
+.price-breakdown { background:var(--bg); border-radius:8px; padding:16px; margin-bottom:16px; }
+.price-row { display:flex; justify-content:space-between; padding:6px 0; font-size:14px; border-bottom:1px solid var(--border); }
+.price-row:last-child { border-bottom:none; }
+.price-row.total { font-weight:700; font-size:16px; color:var(--accent3); padding-top:12px; }
+.price-row span:last-child { font-family:'DM Mono',monospace; }
+.terms-box {
+  background:var(--bg); border:1px solid var(--border); border-radius:8px;
+  padding:16px; font-size:12px; color:var(--muted); line-height:1.7;
+  max-height:160px; overflow-y:auto; margin-bottom:16px;
+}
+.terms-check { display:flex; align-items:flex-start; gap:10px; font-size:13px; margin-bottom:20px; }
+.terms-check input { margin-top:3px; accent-color:var(--accent); }
+.agent-found {
+  background:rgba(71,255,138,0.06); border:1px solid rgba(71,255,138,0.2);
+  border-radius:8px; padding:14px 16px; font-size:13px; margin-bottom:16px;
+  display:flex; align-items:center; gap:10px; color:var(--success);
+}
+
+/* Wizard buttons */
+.wizard-nav { display:flex; justify-content:space-between; align-items:center; margin-top:28px; }
+.btn-back {
+  background:transparent; border:1px solid var(--border); color:var(--muted);
+  padding:12px 24px; border-radius:8px; font-size:14px; font-weight:500;
+  cursor:pointer; font-family:inherit; transition:all 0.15s;
+}
+.btn-back:hover { border-color:var(--text); color:var(--text); }
+.btn-next {
+  background:var(--accent); color:#0a0a0f; border:none;
+  padding:12px 32px; border-radius:8px; font-size:14px; font-weight:700;
+  cursor:pointer; font-family:inherit; transition:opacity 0.2s, transform 0.15s;
+}
+.btn-next:hover { opacity:0.88; transform:translateY(-1px); }
+.btn-place-order {
+  background:var(--accent3); color:#fff; border:none;
+  padding:14px 36px; border-radius:8px; font-size:15px; font-weight:700;
+  cursor:pointer; font-family:inherit; transition:opacity 0.2s;
+}
+.btn-place-order:hover { opacity:0.88; }
+
+/* ── ORDERS PAGE ── */
+.orders-filters { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+.filter-btn {
+  padding:7px 16px; border-radius:100px; border:1px solid var(--border);
+  background:var(--surface); color:var(--muted); font-size:13px; font-weight:500;
+  cursor:pointer; font-family:inherit; transition:all 0.15s;
+}
+.filter-btn.active, .filter-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(232,255,71,0.06); }
+.orders-search {
+  flex:1; min-width:200px; background:var(--surface); border:1px solid var(--border);
+  color:var(--text); padding:8px 14px; border-radius:8px; font-size:13px; font-family:inherit; outline:none;
+}
+.orders-search:focus { border-color:var(--accent2); }
+.orders-list { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+
+/* ── MESSAGE PANEL ── */
+.msg-panel {
+  position:fixed; right:0; top:60px; bottom:0; width:400px;
+  background:var(--surface); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; transform:translateX(100%);
+  transition:transform 0.3s; z-index:200;
+}
+.msg-panel.open { transform:translateX(0); }
+.msg-panel-header {
+  padding:18px 20px; border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.msg-panel-header h3 { font-size:15px; font-weight:600; }
+.msg-panel-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; }
+.msg-panel-addr { font-size:12px; color:var(--muted); margin-top:2px; }
+.msg-panel-body { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.msg-bubble { max-width:85%; padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.5; }
+.msg-bubble.them { background:var(--surface2); border:1px solid var(--border); align-self:flex-start; border-radius:4px 12px 12px 12px; }
+.msg-bubble.us { background:rgba(232,255,71,0.1); border:1px solid rgba(232,255,71,0.2); align-self:flex-end; border-radius:12px 4px 12px 12px; }
+.msg-bubble .msg-time { font-size:10px; color:var(--muted); margin-top:4px; }
+.msg-bubble.system-msg { background:rgba(71,200,255,0.08); border:1px solid rgba(71,200,255,0.2); align-self:center; text-align:center; font-size:12px; color:var(--accent2); border-radius:100px; padding:6px 14px; max-width:95%; }
+.msg-panel-footer { padding:14px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
+.msg-input {
+  flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text);
+  padding:10px 12px; border-radius:8px; font-size:13px; font-family:inherit; outline:none;
+}
+.msg-input:focus { border-color:var(--accent); }
+.msg-send {
+  background:var(--accent); color:#0a0a0f; border:none; border-radius:8px;
+  padding:10px 16px; font-weight:700; font-size:13px; cursor:pointer;
+}
+
+/* ── SUCCESS STATE ── */
+.success-screen {
+  text-align:center; padding:60px 40px; display:none;
+}
+.success-screen.show { display:block; }
+.success-icon { font-size:64px; margin-bottom:20px; }
+.success-screen h2 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:1px; margin-bottom:12px; }
+.success-screen p { color:var(--muted); font-size:15px; line-height:1.6; max-width:440px; margin:0 auto 28px; }
+.order-id-badge {
+  display:inline-block; font-family:'DM Mono',monospace; font-size:16px;
+  background:var(--surface2); border:1px solid var(--border); padding:10px 20px;
+  border-radius:8px; margin-bottom:28px; color:var(--accent);
+}
+
+/* ── NOTIFICATIONS ── */
+.notif {
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:14px 20px; font-size:14px; max-width:340px;
+  transform:translateY(80px); opacity:0; transition:all 0.3s; pointer-events:none;
+}
+.notif.show { transform:translateY(0); opacity:1; pointer-events:auto; }
+.notif.success { border-color:rgba(71,255,138,0.3); }
+.notif.error { border-color:rgba(255,107,71,0.3); }
+
+/* MISC */
+.divider { height:1px; background:var(--border); margin:20px 0; }
+.text-muted { color:var(--muted); }
+.text-accent { color:var(--accent); }
+.text-green { color:var(--success); }
+.text-orange { color:var(--accent3); }
+.mt-8 { margin-top:8px; }
+.mt-12 { margin-top:12px; }
+.empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+.empty-state div { font-size:40px; margin-bottom:12px; }
+
+@media(max-width:768px){
+  .app-nav { padding:0 16px; }
+  .app-main { padding:20px 16px; }
+  .dash-stats { grid-template-columns:1fr 1fr; }
+  .order-type-grid, .speed-grid, .included-grid, .review-grid { grid-template-columns:1fr; }
+  .msg-panel { width:100%; }
+  .app-nav-links { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════════════ -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">Ground<span>View</span>™</div>
+    <div class="auth-subtitle">Member Portal — Field Photography Services</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- Login -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••">
+      </div>
+      <button class="btn-auth" onclick="doLogin()">Sign In →</button>
+      <div class="auth-divider">or</div>
+      <div style="text-align:center;font-size:13px;color:var(--muted);">Don't have an account? <a href="#" onclick="switchTab('register')" style="color:var(--accent2);text-decoration:none;">Create one free</a></div>
+    </div>
+
+    <!-- Register -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-input" id="regFirst" placeholder="John">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-input" id="regLast" placeholder="Smith">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Company Name <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+        <input type="text" class="form-input" id="regCompany" placeholder="Your LLC or company">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-input" id="regPhone" placeholder="(555) 000-0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="regPass" placeholder="Min 8 characters">
+      </div>
+      <button class="btn-auth" onclick="doRegister()">Create Account →</button>
+      <div class="auth-divider">or</div>
+      <div style="text-align:center;font-size:13px;color:var(--muted);">Already have an account? <a href="#" onclick="switchTab('login')" style="color:var(--accent2);text-decoration:none;">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════ -->
+<div class="app" id="appShell">
+
+  <!-- NAV -->
+  <nav class="app-nav">
+    <div class="app-nav-logo">Ground<span>View</span>™</div>
+    <div class="app-nav-links">
+      <button class="nav-link active" onclick="showPage('dashboard')">🏠 Dashboard</button>
+      <button class="nav-link" onclick="showPage('new-order')">📸 New Order</button>
+      <button class="nav-link" onclick="showPage('orders')">📋 My Orders <span class="badge" id="pendingBadge">2</span></button>
+    </div>
+    <div class="app-nav-user">
+      <div class="user-avatar" id="userInitials">JD</div>
+      <div class="user-name" id="userName">John D.</div>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="app-main">
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Welcome Back, <span id="dashName">John</span> 👋</h1>
+        <p>Here's an overview of your GroundView™ activity</p>
+      </div>
+
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-num accent">3</div>
+          <div class="dash-stat-label">Total Orders</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num blue">1</div>
+          <div class="dash-stat-label">In Progress</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num green">1</div>
+          <div class="dash-stat-label">Completed</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num orange">1</div>
+          <div class="dash-stat-label">Awaiting Payment</div>
+        </div>
+      </div>
+
+      <div class="dash-recent">
+        <div class="dash-recent-header">
+          <h3>Recent Orders</h3>
+          <button class="btn-new-order" onclick="showPage('new-order')">+ New Order</button>
+        </div>
+
+        <!-- Sample orders -->
+        <div class="order-card">
+          <div>
+            <div class="order-address">6181 Miss Mary Ann, Haines City FL 33844</div>
+            <span class="order-type-tag tag-appt">Interior/Exterior – Requires Appointment</span>
+            <div class="order-meta">
+              <span>Ordered May 19, 2026</span>
+              <span>Rush – 24hr Weekday</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-sm msg" onclick="openMsg('6181 Miss Mary Ann, Haines City FL 33844')">💬 Messages</button>
+              <button class="btn-sm" onclick="showOrderDetail()">Order Details</button>
+            </div>
+          </div>
+          <div class="order-right">
+            <div><span class="order-status status-assigned"><span class="status-dot"></span> Rep Assigned</span></div>
+            <div class="order-price">$95.00</div>
+            <div class="order-date">May 19, 2026</div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div>
+            <div class="order-address">815 Sendero Trail, Conroe TX 77304</div>
+            <span class="order-type-tag tag-lockbox">Interior/Exterior – Vacant with Lockbox</span>
+            <div class="order-meta">
+              <span>Ordered May 19, 2026</span>
+              <span>Standard Delivery</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-sm msg" onclick="openMsg('815 Sendero Trail, Conroe TX 77304')">💬 Messages</button>
+              <button class="btn-sm" onclick="showOrderDetail()">Order Details</button>
+            </div>
+          </div>
+          <div class="order-right">
+            <div><span class="order-status status-pending"><span class="status-dot"></span> Awaiting Payment</span></div>
+            <div class="order-price">$95.00</div>
+            <div class="order-date">May 19, 2026</div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div>
+            <div class="order-address">144 W 41st St, Jacksonville FL 32206</div>
+            <span class="order-type-tag tag-appt">Interior/Exterior – Requires Appointment</span>
+            <div class="order-meta">
+              <span>Ordered Apr 29, 2026</span>
+              <span>Standard Delivery</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-sm download" onclick="showNotif('Preparing download...','success')">⬇️ Download Photos (.zip)</button>
+              <button class="btn-sm msg" onclick="openMsg('144 W 41st St, Jacksonville FL 32206')">💬 Messages</button>
+              <button class="btn-sm" onclick="showOrderDetail()">Order Details</button>
+            </div>
+          </div>
+          <div class="order-right">
+            <div><span class="order-status status-complete"><span class="status-dot"></span> Completed</span></div>
+            <div class="order-price">$95.00</div>
+            <div class="order-date">Apr 29, 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NEW ORDER PAGE ── -->
+    <div class="page" id="page-new-order">
+      <div class="page-header">
+        <h1>Place New Order</h1>
+        <p>Field photography dispatched to your property — delivered fast.</p>
+      </div>
+
+      <!-- Step Progress -->
+      <div class="order-wizard">
+        <div style="display:flex;flex-direction:column;">
+          <div class="steps-progress" id="stepsProgress">
+            <div style="text-align:center">
+              <div class="step-bubble active" id="bubble-1">1</div>
+              <div class="step-label">Order Type</div>
+            </div>
+            <div class="step-connector" id="conn-1"></div>
+            <div style="text-align:center">
+              <div class="step-bubble" id="bubble-2">2</div>
+              <div class="step-label">Property</div>
+            </div>
+            <div class="step-connector" id="conn-2"></div>
+            <div style="text-align:center">
+              <div class="step-bubble" id="bubble-3">3</div>
+              <div class="step-label">Service Speed</div>
+            </div>
+            <div class="step-connector" id="conn-3"></div>
+            <div style="text-align:center">
+              <div class="step-bubble" id="bubble-4">4</div>
+              <div class="step-label">Details</div>
+            </div>
+            <div class="step-connector" id="conn-4"></div>
+            <div style="text-align:center">
+              <div class="step-bubble" id="bubble-5">5</div>
+              <div class="step-label">Review</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 1: ORDER TYPE -->
+        <div class="wizard-step active" id="wstep-1">
+          <div class="card-section">
+            <div class="card-section-header">
+              <span class="section-icon">📸</span>
+              <h3>Choose Your Order Type</h3>
+            </div>
+            <div class="card-section-body">
+              <div class="order-type-grid">
+                <div class="order-type-card selected" id="otc-lockbox" onclick="selectOrderType('lockbox')">
+                  <div class="otc-icon">🔒</div>
+                  <div class="otc-name">Interior/Exterior Photos</div>
+                  <div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:6px;">VACANT WITH LOCKBOX</div>
+                  <div class="otc-desc">Property is vacant and accessible via lockbox. Our field agent will access the property using the code you provide.</div>
+                  <div class="otc-price">$95<span class="otc-price-note">/single family</span></div>
+                </div>
+                <div class="order-type-card" id="otc-appt" onclick="selectOrderType('appt')">
+                  <div class="otc-icon">📅</div>
+                  <div class="otc-name">Interior/Exterior Photos</div>
+                  <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;">REQUIRES APPOINTMENT</div>
+                  <div class="otc-desc">Property requires a scheduled appointment. A point of contact must be available to grant access on the agreed date and time.</div>
+                  <div class="otc-price">$95<span class="otc-price-note">/single family</span></div>
+                </div>
+              </div>
+
+              <!-- Lockbox code field -->
+              <div class="lockbox-field visible" id="lockboxField">
+                <label class="form-label">Lockbox Access Code</label>
+                <input type="text" class="form-input" id="lockboxCode" placeholder="Enter lockbox code (e.g. 1234)">
+                <div class="lockbox-note">
+                  If the property requires a lockbox code for entry, enter it here. 
+                  <strong>Please note:</strong> Very few of our field agents have Supra key access — if your lockbox is a Supra/SentriLock, please indicate this in the comments section below and we'll do our best to accommodate.
+                </div>
+              </div>
+
+              <!-- Property Type -->
+              <div class="divider"></div>
+              <label class="form-label">Property Type</label>
+              <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Duplex, multi-family, and additional units carry a +$20 per unit fee.</p>
+              <div class="property-type-row">
+                <button class="prop-btn active" onclick="selectPropType(this,'single',$0)">🏠 Single Family — $95</button>
+                <button class="prop-btn" onclick="selectPropType(this,'duplex',$20)">🏘 Duplex — $115 (+$20)</button>
+                <button class="prop-btn" onclick="selectPropType(this,'triplex',$40)">🏘 Triplex — $135 (+$40)</button>
+                <button class="prop-btn" onclick="selectPropType(this,'fourplex',$60)">🏢 4-Unit — $155 (+$60)</button>
+                <button class="prop-btn" onclick="selectPropType(this,'5plus',null)">🏢 5+ Units — Contact Us</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- What's Included -->
+          <div class="card-section">
+            <div class="card-section-header">
+              <span class="section-icon">✅</span>
+              <h3>What's Included in Every Order</h3>
+            </div>
+            <div class="card-section-body">
+              <div class="included-grid">
+                <div class="included-section">
+                  <h4>🏡 Exterior Coverage</h4>
+                  <ul class="included-list">
+                    <li>Front of home — straight-on shot</li>
+                    <li>Rear of home</li>
+                    <li>Left and right sides</li>
+                    <li>Left and right 45° angled views</li>
+                    <li>Backyard area</li>
+                    <li>Street scenes — left and right</li>
+                    <li>Address verification (mailbox or signage)</li>
+                    <li>Street name sign</li>
+                    <li>Any visible damage</li>
+                    <li>Where present: A/C unit, pool, patio, deck, lanai, shed, hot tub</li>
+                  </ul>
+                </div>
+                <div class="included-section">
+                  <h4>🛋️ Interior Coverage</h4>
+                  <ul class="included-list">
+                    <li>All bedrooms</li>
+                    <li>All bathrooms</li>
+                    <li>Kitchen & appliances</li>
+                    <li>Dining room or dining area</li>
+                    <li>All remaining rooms</li>
+                    <li>Garage (if applicable)</li>
+                    <li>Any visible damage</li>
+                    <li>Where accessible: air handler, furnace/boiler, water heater, electrical panel</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <!-- Gated Community -->
+              <div>
+                <div class="gated-toggle" onclick="toggleGated()">
+                  <div class="toggle-switch" id="gatedToggle"><div class="toggle-knob"></div></div>
+                  <div>
+                    <div class="gated-label">Gated or Guarded Community?</div>
+                    <div style="font-size:12px;color:var(--muted);">Enable if the property is behind a gate or guard station</div>
+                  </div>
+                </div>
+                <div class="gated-info" id="gatedInfo">
+                  <strong style="color:var(--warning);">⚠️ Important:</strong> If the property is in a gated or guarded community, please leave the gate access code in the comments section. Our field agents will not make phone calls to gain entry to exterior orders.<br><br>
+                  If access cannot be obtained, your order will still be fulfilled with: a photo of the closed gate, the community entrance sign, adjacent street scenes (left and right), the nearest street sign, and up to 3 additional community area images (guardhouse, landscaping, etc.).
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-nav">
+            <div></div>
+            <button class="btn-next" onclick="goStep(2)">Continue: Property Address →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: PROPERTY ADDRESS -->
+        <div class="wizard-step" id="wstep-2">
+          <div class="card-section">
+            <div class="card-section-header">
+              <span class="section-icon">📍</span>
+              <h3>Property Address</h3>
+            </div>
+            <div class="card-section-body">
+              <div class="form-group">
+                <label class="form-label">Street Address *</label>
+                <div class="address-lookup-wrap">
+                  <input type="text" class="form-input" id="propStreet" placeholder="123 Main Street" oninput="triggerAddressLookup()">
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">City *</label>
+                  <input type="text" class="form-input" id="propCity" placeholder="Dallas" oninput="triggerAddressLookup()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">State *</label>
+                  <input type="text" class="form-input" id="propState" placeholder="TX" maxlength="2" oninput="triggerAddressLookup()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">ZIP *</label>
+                  <input type="text" class="form-input" id="propZip" placeholder="75201" oninput="triggerAddressLookup()">
+                </div>
+              </div>
+
+              <!-- Address verification status -->
+              <div class="address-verify" id="addrVerify">
+                <span id="addrVerifyIcon"></span>
+                <span id="addrVerifyText"></span>
+              </div>
+
+              <div style="margin-top:14px;padding:12px 16px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6;">
+                📍 <strong style="color:var(--text);">Address Verification:</strong> We use Google Maps to verify and confirm property addresses and time zones. If we can't find an exact match, we'll show you the closest result and let you decide how to proceed. If only a street name is entered without a specific number, your order will include street scenes and signage only.
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-nav">
+            <button class="btn-back" onclick="goStep(1)">← Back</button>
+            <button class="btn-next" onclick="goStep(3)">Continue: Service Speed →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: SERVICE SPEED -->
+        <div class="wizard-step" id="wstep-3">
+          <div class="card-section">
+            <div class="card-section-header">
+              <span class="section-icon">⚡</span>
+              <h3>Delivery Speed</h3>
+            </div>
+            <div class="card-section-body">
+              <div class="speed-grid">
+                <div class="speed-card selected" id="speed-std" onclick="selectSpeed('std',0)">
+                  <div><span class="speed-badge badge-std">STANDARD</span></div>
+                  <div class="speed-name">Standard Delivery</div>
+                  <div class="speed-desc">Orders submitted before 10:00 AM in the property's local time zone are fulfilled by the next business day. Completion time is not guaranteed to the hour.</div>
+                  <div class="speed-price">Included</div>
+                </div>
+                <div class="speed-card" id="speed-rush" onclick="selectSpeed('rush',25)">
+                  <div><span class="speed-badge badge-rush">RUSH</span></div>
+                  <div class="speed-name">Priority 24-Hour</div>
+                  <div class="speed-desc">Weekday rush service. If your order is placed on a weekend or holiday, processing begins the next business day at 12:00 AM. Rush adds $25 to your order total.</div>
+                  <div class="speed-price">+$25.00</div>
+                </div>
+                <div class="speed-card" id="speed-rocket" onclick="selectSpeed('rocket',45)">
+                  <div><span class="speed-badge badge-rocket">ROCKET</span></div>
+                  <div class="speed-name">6-Hour Express</div>
+                  <div class="speed-desc">Must be placed by 10:00 AM in the property's local time zone on a weekday. Orders after the 10 AM cutoff will be prioritized at our highest level but a 6-hour window cannot be guaranteed.</div>
+                  <div class="speed-price">+$45.00</div>
+                </div>
+              </div>
+              <div style="margin-top:16px;padding:12px 16px;background:rgba(255,187,71,0.06);border:1px solid rgba(255,187,71,0.2);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6;">
+                ⏱️ <strong style="color:var(--warning);">Delivery clock starts after payment is processed.</strong> Rush and Express service are only available on weekdays. Orders placed on weekends or holidays will begin processing on the next business day.
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-nav">
+            <button class="btn-back" onclick="goStep(2)">← Back</button>
+            <button class="btn-next" onclick="goStep(4)">Continue: Order Details →</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: DETAILS -->
+        <div class="wizard-step" id="wstep-4">
+          <div class="card-section">
+            <div class="card-section-header">
+              <span class="section-icon">💬</span>
+              <h3>Comments for Field Agent</h3>
+              <span style="font-size:12px;color:var(--muted);margin-left:auto;">Optional</span>
+            </div>
+            <div class="card-section-body">
+              <textarea class="comments-area" id="orderComments" placeholder="Provide any access details, directions, or special instructions for our field agent..."></textarea>
+              <div class="comments-warning">
+                <strong>⚠️ Please read before submitting comments:</strong><br>
+                Any text entered here is reviewed by our team before the order is dispatched to the field agent — <strong>this will delay your order.</strong> Use this section to share access details, point of contact info (name and phone only), or location guidance for hard-to-find properties.<br><br>
+                Please do not include your own name, email, or phone number here — we already have your info on file and including it may result in account suspension. Also, please avoid writing in ALL CAPS or using excessive exclamation marks, as our field agents find this off-putting. Comments are for guidance only — orders cannot be modified once a field agent is assigned.
+              </div>
+            </div>
+          </div>
+
+          <div class="card-section">
+            <div class="card-section-header">
+              <span class="section-icon">📎</span>
+              <h3>File Attachments</h3>
+              <span style="font-size:12px;color:var(--muted);margin-left:auto;">Optional — Max 3 files</span>
+            </div>
+            <div class="card-section-body">
+              <div class="file-upload-zone" id="attachZone">
+                <input type="file" accept=".pdf,.doc,.docx" multiple id="attachInput" onchange="handleAttachments(event)">
+                <p>📄 Drag files here or click to browse</p>
+                <small>PDF or Word documents only. For occupancy notices or rural property maps. Tax records will not be accepted.</small>
+              </div>
+              <div class="file-list" id="fileList"></div>
+            </div>
+          </div>
+
+          <div class="wizard-nav">
+            <button class="btn-back" onclick="goStep(3)">← Back</button>
+            <button class="btn-next" onclick="goStep(5)">Continue: Review Order →</button>
+          </div>
+        </div>
+
+        <!-- STEP 5: REVIEW & PLACE ORDER -->
+        <div class="wizard-step" id="wstep-5">
+          <div id="reviewContent">
+            <div class="card-section">
+              <div class="card-section-header">
+                <span class="section-icon">🔍</span>
+                <h3>Review Your Order</h3>
+              </div>
+              <div class="card-section-body">
+                <div class="agent-found">
+                  <span>📍</span>
+                  <span>We've located a verified field agent near the subject property and ready to be dispatched upon payment.</span>
+                </div>
+
+                <div class="review-grid">
+                  <div class="review-item">
+                    <div class="review-label">Order Type</div>
+                    <div class="review-value" id="rv-type">Interior/Exterior – Vacant with Lockbox</div>
+                  </div>
+                  <div class="review-item">
+                    <div class="review-label">Property Type</div>
+                    <div class="review-value" id="rv-proptype">Single Family</div>
+                  </div>
+                  <div class="review-item">
+                    <div class="review-label">Property Address</div>
+                    <div class="review-value" id="rv-address">—</div>
+                  </div>
+                  <div class="review-item">
+                    <div class="review-label">Service Speed</div>
+                    <div class="review-value" id="rv-speed">Standard Delivery</div>
+                  </div>
+                  <div class="review-item">
+                    <div class="review-label">Photo Size</div>
+                    <div class="review-value">800×600</div>
+                  </div>
+                  <div class="review-item">
+                    <div class="review-label">Expected Delivery</div>
+                    <div class="review-value" id="rv-delivery">Next Business Day</div>
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="price-breakdown">
+                  <div class="price-row">
+                    <span id="rv-base-label">Interior/Exterior Photos</span>
+                    <span id="rv-base-price">$95.00</span>
+                  </div>
+                  <div class="price-row" id="rv-addon-row" style="display:none;">
+                    <span id="rv-addon-label">Multi-unit surcharge</span>
+                    <span id="rv-addon-price">$0.00</span>
+                  </div>
+                  <div class="price-row" id="rv-speed-row" style="display:none;">
+                    <span id="rv-speed-label">Rush service</span>
+                    <span id="rv-speed-price">$0.00</span>
+                  </div>
+                  <div class="price-row total">
+                    <span>Total</span>
+                    <span id="rv-total">$95.00</span>
+                  </div>
+                </div>
+
+                <div class="terms-box">
+                  <strong>Order Terms & Conditions</strong><br><br>
+                  By placing an order you agree to pay for services according to our service agreement. If you are not satisfied with the photos received, you have <strong>7 days from delivery</strong> to open a dispute through your message center. After 7 days, the order is considered completed to your satisfaction and the transaction is final.<br><br>
+                  Once a field agent accepts your order, it <strong>cannot be canceled</strong>. Standard orders placed before 10:00 AM in the property's local time zone are fulfilled by the next business day (Monday–Friday, excluding holidays). Specific delivery times are not guaranteed. Inclement weather may cause delays — we will never put our field agents in unsafe situations.<br><br>
+                  For safety and legal reasons, all exterior photography is taken from <strong>public property only</strong>. Our field agents will not enter private property or private roads for exterior orders.<br><br>
+                  If a resident or occupant becomes hostile, the field agent will reschedule. If threatened, the order will be canceled immediately for their safety.<br><br>
+                  <strong>Important — Multi-Unit Properties:</strong> By placing this order, you confirm this is the property type selected above. If our field agent arrives and finds additional units not accounted for, a <strong>$20 surcharge per additional unit</strong> will be applied automatically.<br><br>
+                  A <strong>$0.50 processing fee</strong> applies to any canceled order to cover mapping and third-party costs. This is non-refundable.
+                </div>
+
+                <div class="terms-check">
+                  <input type="checkbox" id="termsCheck">
+                  <label for="termsCheck" style="cursor:pointer;">I have read and agree to the order terms above. I confirm the property address is accurate and the property type is correctly selected.</label>
+                </div>
+
+                <button class="btn-place-order" onclick="placeOrder()">🔒 Place Order & Proceed to Payment →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Success State -->
+          <div class="success-screen" id="successScreen">
+            <div class="success-icon">✅</div>
+            <h2>Order Placed!</h2>
+            <div class="order-id-badge" id="orderIdBadge">GV-2026-0047</div>
+            <p>Your order has been received and is being reviewed. Once payment is processed, your field agent will be dispatched — you'll receive updates right here in your dashboard.</p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+              <button class="btn-next" onclick="showPage('orders')">View My Orders</button>
+              <button class="btn-back" onclick="resetOrder()">Place Another Order</button>
+            </div>
+          </div>
+
+          <div class="wizard-nav" id="reviewNav">
+            <button class="btn-back" onclick="goStep(4)">← Back</button>
+          </div>
+        </div>
+
+      </div><!-- end order-wizard -->
+    </div><!-- end new-order page -->
+
+    <!-- ── ORDERS PAGE ── -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <h1>My Orders</h1>
+        <p>Track, message, and download your field photography orders</p>
+      </div>
+
+      <div class="orders-filters">
+        <input class="orders-search" type="text" placeholder="🔍 Search by address...">
+        <button class="filter-btn active" onclick="setFilter(this,'all')">All Orders</button>
+        <button class="filter-btn" onclick="setFilter(this,'pending')">⏳ Awaiting Payment</button>
+        <button class="filter-btn" onclick="setFilter(this,'assigned')">🔵 Rep Assigned</button>
+        <button class="filter-btn" onclick="setFilter(this,'complete')">✅ Completed</button>
+      </div>
+
+      <div class="orders-list">
+        <div class="order-card">
+          <div>
+            <div class="order-address">6181 Miss Mary Ann, Haines City FL 33844</div>
+            <span class="order-type-tag tag-appt">Interior/Exterior – Requires Appointment</span>
+            <div class="order-meta">
+              <span>May 19, 2026</span>
+              <span>Rush – 24hr Weekday</span>
+              <span style="color:var(--accent2);">Rep accepted at 11:53 AM — photos pending</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-sm msg" onclick="openMsg('6181 Miss Mary Ann, Haines City FL 33844')">💬 Messages</button>
+              <button class="btn-sm" onclick="showOrderDetail()">Order Details</button>
+            </div>
+          </div>
+          <div class="order-right">
+            <span class="order-status status-assigned"><span class="status-dot"></span> Rep Assigned</span>
+            <div class="order-price">$120.00</div>
+            <div class="order-date">Rush +$25</div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div>
+            <div class="order-address">815 Sendero Trail, Conroe TX 77304</div>
+            <span class="order-type-tag tag-lockbox">Interior/Exterior – Vacant with Lockbox</span>
+            <div class="order-meta">
+              <span>May 19, 2026</span>
+              <span>Standard Delivery</span>
+              <span style="color:var(--warning);">⚠️ Requires payment — order will be released after checkout</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-sm" style="border-color:var(--accent3);color:var(--accent3);background:rgba(255,107,71,0.05);" onclick="showNotif('Redirecting to checkout...','success')">💳 Pay Now</button>
+              <button class="btn-sm" onclick="showOrderDetail()">Order Details</button>
+            </div>
+          </div>
+          <div class="order-right">
+            <span class="order-status status-pending"><span class="status-dot"></span> Awaiting Payment</span>
+            <div class="order-price">$95.00</div>
+            <div class="order-date">Standard</div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div>
+            <div class="order-address">144 W 41st St, Jacksonville FL 32206</div>
+            <span class="order-type-tag tag-appt">Interior/Exterior – Requires Appointment</span>
+            <div class="order-meta">
+              <span>Apr 29, 2026</span>
+              <span>Standard Delivery</span>
+              <span style="color:var(--success);">✓ Completed — photos ready</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-sm download" onclick="showNotif('Preparing your photo package for download...','success')">⬇️ Download Photos (.zip)</button>
+              <button class="btn-sm msg" onclick="openMsg('144 W 41st St, Jacksonville FL 32206')">💬 Messages</button>
+              <button class="btn-sm" onclick="showOrderDetail()">Order Details</button>
+              <button class="btn-sm" onclick="showNotif('Order re-order initiated!','success')">🔁 Re-Order</button>
+            </div>
+          </div>
+          <div class="order-right">
+            <span class="order-status status-complete"><span class="status-dot"></span> Completed</span>
+            <div class="order-price">$95.00</div>
+            <div class="order-date">Apr 29, 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end app-main -->
+</div><!-- end app -->
+
+<!-- ── MESSAGE PANEL ── -->
+<div class="msg-panel" id="msgPanel">
+  <div class="msg-panel-header">
+    <div>
+      <h3>💬 Order Messages</h3>
+      <div class="msg-panel-addr" id="msgAddr">144 W 41st St, Jacksonville FL 32206</div>
+    </div>
+    <button class="msg-panel-close" onclick="closeMsg()">✕</button>
+  </div>
+  <div class="msg-panel-body" id="msgBody">
+    <div class="msg-bubble system-msg">Order created — May 19, 2026 at 10:14 AM</div>
+    <div class="msg-bubble them">
+      <strong>GroundView Support</strong><br>
+      Your order has been received and a field agent is being assigned to your area. Standard orders placed before 10 AM are fulfilled next business day.
+      <div class="msg-time">10:15 AM</div>
+    </div>
+    <div class="msg-bubble system-msg">Field agent assigned — May 19, 2026 at 11:53 AM</div>
+    <div class="msg-bubble them">
+      <strong>GroundView Support</strong><br>
+      Great news! A field agent has been assigned to your order and has accepted the job. Photos are pending completion.
+      <div class="msg-time">11:54 AM</div>
+    </div>
+    <div class="msg-bubble us">
+      Is there parking available at the rear of the property?
+      <div class="msg-time">12:02 PM</div>
+    </div>
+    <div class="msg-bubble them">
+      <strong>GroundView Support</strong><br>
+      We've passed that note along to your field agent. They'll plan accordingly.
+      <div class="msg-time">12:08 PM</div>
+    </div>
+    <div class="msg-bubble system-msg">Order completed — photos delivered</div>
+  </div>
+  <div class="msg-panel-footer">
+    <input class="msg-input" type="text" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="msg-send" onclick="sendMsg()">Send</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION TOAST -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ── STATE ──
+let currentUser = null;
+let currentStep = 1;
+let orderType = 'lockbox';
+let propType = 'single';
+let propAddon = 0;
+let speedAddon = 0;
+let speedName = 'Standard Delivery';
+let gatedOn = false;
+let attachedFiles = [];
+let addrTimer = null;
+
+// ── AUTH ──
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('loginForm').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!email || !pass) { showNotif('Please enter your email and password.','error'); return; }
+  // Demo: any credentials work
+  const name = email.split('@')[0];
+  const first = name.charAt(0).toUpperCase() + name.slice(1);
+  loginAs({ first, last: '', email });
+}
+
+function doRegister() {
+  const first = document.getElementById('regFirst').value.trim();
+  const last = document.getElementById('regLast').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  if (!first || !email || !pass) { showNotif('Please fill in all required fields.','error'); return; }
+  if (pass.length < 8) { showNotif('Password must be at least 8 characters.','error'); return; }
+  loginAs({ first, last, email });
+}
+
+function loginAs(user) {
+  currentUser = user;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').classList.add('visible');
+  const initials = (user.first[0]||'') + (user.last[0]||'');
+  document.getElementById('userInitials').textContent = initials || user.email[0].toUpperCase();
+  document.getElementById('userName').textContent = user.first + (user.last ? ' ' + user.last[0]+'.' : '');
+  document.getElementById('dashName').textContent = user.first;
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('appShell').classList.remove('visible');
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+// ── NAVIGATION ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => {
+    if (l.textContent.toLowerCase().includes(name.replace('-',' '))) l.classList.add('active');
+  });
+  window.scrollTo(0,0);
+}
+
+// ── ORDER WIZARD ──
+function goStep(n) {
+  // Validate step 2 — need address
+  if (n > 2) {
+    const street = document.getElementById('propStreet').value.trim();
+    const city = document.getElementById('propCity').value.trim();
+    if (n === 3 && (!street || !city)) {
+      showNotif('Please enter the property address before continuing.', 'error');
+      if (currentStep < 2) goStep(2);
+      return;
+    }
+  }
+  // Update review page
+  if (n === 5) buildReview();
+
+  // Hide current, show next
+  document.getElementById('wstep-'+currentStep).classList.remove('active');
+  document.getElementById('wstep-'+n).classList.add('active');
+
+  // Update bubbles
+  for (let i = 1; i <= 5; i++) {
+    const b = document.getElementById('bubble-'+i);
+    if (i < n) { b.classList.remove('active'); b.classList.add('done'); b.textContent='✓'; }
+    else if (i === n) { b.classList.add('active'); b.classList.remove('done'); b.textContent=i; }
+    else { b.classList.remove('active','done'); b.textContent=i; }
+    if (i < 5) {
+      const c = document.getElementById('conn-'+i);
+      c.classList.toggle('done', i < n);
+    }
+  }
+  currentStep = n;
+  window.scrollTo(0,0);
+}
+
+function selectOrderType(type) {
+  orderType = type;
+  document.getElementById('otc-lockbox').classList.toggle('selected', type==='lockbox');
+  document.getElementById('otc-appt').classList.toggle('selected', type==='appt');
+  document.getElementById('lockboxField').classList.toggle('visible', type==='lockbox');
+}
+
+function selectPropType(el, type, addon) {
+  document.querySelectorAll('.prop-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  propType = type;
+  propAddon = addon || 0;
+}
+
+function toggleGated() {
+  gatedOn = !gatedOn;
+  document.getElementById('gatedToggle').classList.toggle('on', gatedOn);
+  document.getElementById('gatedInfo').classList.toggle('visible', gatedOn);
+}
+
+function selectSpeed(type, addon) {
+  speedAddon = addon;
+  document.querySelectorAll('.speed-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('speed-'+type).classList.add('selected');
+  const names = { std:'Standard Delivery', rush:'Priority 24-Hour', rocket:'6-Hour Express' };
+  speedName = names[type];
+  const deliveries = { std:'Next Business Day (before 10 AM cutoff)', rush:'Within 24 Hours (weekdays)', rocket:'Within 6 Hours (by 10 AM weekday cutoff)' };
+  document.getElementById('rv-delivery').textContent = deliveries[type];
+}
+
+function triggerAddressLookup() {
+  clearTimeout(addrTimer);
+  addrTimer = setTimeout(verifyAddress, 800);
+}
+
+function verifyAddress() {
+  const street = document.getElementById('propStreet').value.trim();
+  const city = document.getElementById('propCity').value.trim();
+  const state = document.getElementById('propState').value.trim();
+  const zip = document.getElementById('propZip').value.trim();
+  const el = document.getElementById('addrVerify');
+  if (!street || !city) { el.className='address-verify'; return; }
+  // Simulate verification
+  el.className = 'address-verify show ok';
+  document.getElementById('addrVerifyIcon').textContent = '✅';
+  document.getElementById('addrVerifyText').textContent = `Address verified: ${street}, ${city}${state?' '+state:''} ${zip} — field coverage confirmed.`;
+}
+
+function buildReview() {
+  const street = document.getElementById('propStreet').value.trim();
+  const city = document.getElementById('propCity').value.trim();
+  const state = document.getElementById('propState').value.trim();
+  const zip = document.getElementById('propZip').value.trim();
+  const addr = [street, city, state, zip].filter(Boolean).join(', ') || '—';
+
+  document.getElementById('rv-type').textContent = orderType==='lockbox' ? 'Interior/Exterior – Vacant with Lockbox' : 'Interior/Exterior – Requires Appointment';
+  document.getElementById('rv-address').textContent = addr;
+  document.getElementById('rv-speed').textContent = speedName;
+  const ptLabels = { single:'Single Family', duplex:'Duplex', triplex:'Triplex', fourplex:'4-Unit' };
+  document.getElementById('rv-proptype').textContent = ptLabels[propType] || propType;
+
+  const base = 95;
+  const total = base + propAddon + speedAddon;
+  document.getElementById('rv-base-price').textContent = '$'+base+'.00';
+  document.getElementById('rv-total').textContent = '$'+total+'.00';
+
+  if (propAddon > 0) {
+    document.getElementById('rv-addon-row').style.display='flex';
+    document.getElementById('rv-addon-price').textContent = '+$'+propAddon+'.00';
+  }
+  if (speedAddon > 0) {
+    document.getElementById('rv-speed-row').style.display='flex';
+    document.getElementById('rv-speed-price').textContent = '+$'+speedAddon+'.00';
+    document.getElementById('rv-speed-label').textContent = speedName + ' upgrade';
+  }
+}
+
+function placeOrder() {
+  if (!document.getElementById('termsCheck').checked) {
+    showNotif('Please agree to the order terms before placing your order.','error');
+    return;
+  }
+  const orderId = 'GV-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('orderIdBadge').textContent = orderId;
+  document.getElementById('reviewContent').style.display = 'none';
+  document.getElementById('reviewNav').style.display = 'none';
+  document.getElementById('successScreen').classList.add('show');
+  document.getElementById('pendingBadge').textContent = '3';
+}
+
+function resetOrder() {
+  orderType = 'lockbox'; propType = 'single'; propAddon = 0; speedAddon = 0;
+  speedName = 'Standard Delivery'; gatedOn = false; currentStep = 1;
+  document.getElementById('reviewContent').style.display='block';
+  document.getElementById('reviewNav').style.display='flex';
+  document.getElementById('successScreen').classList.remove('show');
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wstep-1').classList.add('active');
+  for (let i=1;i<=5;i++){
+    const b=document.getElementById('bubble-'+i);
+    b.classList.remove('active','done'); b.textContent=i;
+    if(i<5) document.getElementById('conn-'+i).classList.remove('done');
+  }
+  document.getElementById('bubble-1').classList.add('active');
+  document.getElementById('propStreet').value='';
+  document.getElementById('propCity').value='';
+  document.getElementById('propState').value='';
+  document.getElementById('propZip').value='';
+  document.getElementById('orderComments').value='';
+  document.getElementById('termsCheck').checked=false;
+  document.getElementById('addrVerify').className='address-verify';
+  selectOrderType('lockbox');
+  selectSpeed('std',0);
+}
+
+function handleAttachments(e) {
+  const files = Array.from(e.target.files).slice(0, 3 - attachedFiles.length);
+  files.forEach(f => attachedFiles.push(f));
+  renderFileList();
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = attachedFiles.map((f,i) => `
+    <div class="file-item">
+      <span>📄 ${f.name}</span>
+      <span class="file-remove" onclick="removeFile(${i})">Remove</span>
+    </div>`).join('');
+}
+
+function removeFile(i) { attachedFiles.splice(i,1); renderFileList(); }
+
+function showOrderDetail() { showNotif('Order detail view coming soon — full admin panel in next build.','success'); }
+
+// ── MESSAGING ──
+function openMsg(addr) {
+  document.getElementById('msgAddr').textContent = addr;
+  document.getElementById('msgPanel').classList.add('open');
+}
+function closeMsg() { document.getElementById('msgPanel').classList.remove('open'); }
+
+function sendMsg() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const body = document.getElementById('msgBody');
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  body.innerHTML += `<div class="msg-bubble us">${text}<div class="msg-time">${now}</div></div>`;
+  input.value = '';
+  body.scrollTop = body.scrollHeight;
+  setTimeout(() => {
+    body.innerHTML += `<div class="msg-bubble them"><strong>GroundView Support</strong><br>Thanks for reaching out — we'll follow up shortly.<div class="msg-time">${now}</div></div>`;
+    body.scrollTop = body.scrollHeight;
+  }, 1200);
+}
+
+// ── FILTERS ──
+function setFilter(el, type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── NOTIFICATIONS ──
+function showNotif(msg, type='success') {
+  const el = document.getElementById('notif');
+  el.textContent = (type==='success' ? '✅ ' : '❌ ') + msg;
+  el.className = 'notif show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
